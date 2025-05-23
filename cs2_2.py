@@ -9,14 +9,13 @@ from math import sqrt
 import threading
 import winsound
 
-model=YOLO('runs/detect/train5/weights/best.pt')
+model=YOLO('best.pt')
 
 pid = PID.PID()
 
-# 比例系数，数字越小表示移动越快
 k1 = 1.5
 k2 = 3
-k3 = 4
+k3 = 4.5
 
 first = 'head'
 enemy = 'T'
@@ -27,20 +26,18 @@ keyboard.wait('1') # 等待按下1
 running = True
 winsound.Beep(800, 200)
 
-# 选择最近的目标
 def near_p(s):
     if len(s) == 1:
         return s[0]
     near_p = s[0]
-    min_xy = abs(near_p[0]) + abs(near_p[1])
+    last_xy = abs(s[0][0]) + abs(s[0][1])
     for p in s:
         xy = abs(p[0]) + abs(p[1])
-        if xy < min_xy:
+        if xy < last_xy:
             near_p = p
-            min_xy = xy
+        last_xy = xy
     return near_p
 
-# 以边缘为目标
 def near_area_h(p):
     new_p = []
     k = p[3] / p[2] # h / w
@@ -67,7 +64,6 @@ def near_area_b(p):
     p1 = [p[0], p[1], w1, h1]
     return near_area_h(p1)
 
-# 快捷键
 def first_h_b():
     global first
     if first == 'head':
@@ -113,7 +109,6 @@ def select():
 
 threading.Thread(target=select, daemon=True).start()
 
-# 主线程
 while running:
     print('优先打: ', first)
     print('敌人: ', enemy)
@@ -167,17 +162,17 @@ while running:
                 if cls ==  0:  # 身体类别
                     body.append([err_x, err_y, w, h])
 
-    print('head:',head)
-    print('body:',body)
+    print(head)
+    print(body)
 
     if first == 'head':
         if head:
             new_p = []
             p = near_p(head) # 取离得最近的坐标
-            print('p:', p)
-            if abs(p[0]) > p[2] * 0.5 and abs(p[1]) > p[3] * 0.5: #在矩形范围之外
+            if abs(p[0]) > p[2] * 0.5 and abs(p[1]) > p[3] * 0.5:
                 new_p = near_area_h(p)
-                print('new_p:',new_p)
+                print(new_p)
+            sum = sqrt(p[0] ** 2 + p[1] ** 2)
             if fire == 'on' and abs(p[0]) <= p[2] * 0.3 and abs(p[1]) <= p[3] * 0.3: # 自动开火
                 pid._click()
             if new_p:
@@ -188,10 +183,9 @@ while running:
         elif body:
             new_p = []
             p = near_p(body) # 取离得最近的坐标
-            print('p:', p)
-            if abs(p[0]) > p[2] * 0.5 and abs(p[1]) > p[3] * 0.5:
-                new_p = near_area_b(p)
-                print('new_p:',new_p)
+            if abs(p[0]) > p[2] * 0.6 and abs(p[1]) > p[3] * 0.6:
+                new_p = near_area_h(p)
+            sum = sqrt(p[0] ** 2 + p[1] ** 2)
             if fire == 'on' and abs(p[0]) <= p[2] * 0.3 and abs(p[1]) <= p[3] * 0.3: # 自动开火
                 pid._click()
             if new_p:
@@ -202,10 +196,9 @@ while running:
         if body:
             new_p = []
             p = near_p(body) # 取离得最近的坐标
-            print('p:', p)
-            if abs(p[0]) > p[2] * 0.5 and abs(p[1]) > p[3] * 0.5:
+            if abs(p[0]) > p[2] * 0.6 and abs(p[1]) > p[3] * 0.6:
                 new_p = near_area_h(p)
-                print('new_p:',new_p)
+            sum = sqrt(p[0] ** 2 + p[1] ** 2)
             if fire == 'on' and abs(p[0]) <= p[2] * 0.3 and abs(p[1]) <= p[3] * 0.3: # 自动开火
                 pid._click()
             if new_p:
@@ -216,10 +209,9 @@ while running:
         elif head:
             new_p = []
             p = near_p(head) # 取离得最近的坐标
-            print('p:', p)
-            if abs(p[0]) > p[2] * 0.5 and abs(p[1]) > p[3] * 0.5:
-                new_p = near_area_b(p)
-                print('new_p:',new_p)
+            if abs(p[0]) > p[2] * 0.6 and abs(p[1]) > p[3] * 0.6:
+                new_p = near_area_h(p)
+            sum = sqrt(p[0] ** 2 + p[1] ** 2)
             if fire == 'on' and abs(p[0]) <= p[2] * 0.3 and abs(p[1]) <= p[3] * 0.3: # 自动开火
                 pid._click()
             if new_p:
