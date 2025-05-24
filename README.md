@@ -12,24 +12,29 @@
 
 ## 环境搭建
 1. 主要就是配yolov11的环境，其他还有一些依赖库可自行看代码安装。
+
 yolov11源码地址：
+
 https://github.com/ultralytics/ultralytics
+
 搭建教程：
+
 https://www.bilibili.com/video/BV1xgcLeLE7a/?spm_id_from=333.337.search-card.all.click&vd_source=7a246f3599c93bd9ab74f15842ec7bec
 
 2. 由于cs2反作弊机制的影响，游戏过程中一般的Windows api无法移动准心，这里用了罗技鼠标宏，需先下载软件。
+
 下载地址：https://pan.baidu.com/s/1UuvGDVMzrZKtE8NtYYgIGQ 提取码: 0721
 
 ---
 
 ## 使用方法
-1. 修改logi.py文件第7行中dll的路径，根据下载路径改为实际存在的绝对路径。
-2. 环境搭好之后运行cs2.py。
-3. 按/选择攻击头或身体。
-4. 按*选择攻击T或CT。
-5. 按-选择开启或关闭自动开火。
-6. 按+选择是否暂停。
-7. 按=结束（实际可能还需按一下+）。
+1. 修改logi.py文件第7行中dll的路径，根据下载路径改为实际存在的绝对路径
+2. 环境搭好之后运行cs2.py
+3. 按/选择攻击头或身体
+4. 按*选择攻击T或CT
+5. 按-选择开启或关闭自动开火
+6. 按+选择是否暂停
+7. 按=结束（实际可能还需按一下+）
 
 ---
 
