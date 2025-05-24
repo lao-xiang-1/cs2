@@ -4,7 +4,7 @@ import winsound
 
 try:
     root = os.path.abspath(os.path.dirname(__file__))
-    driver = ctypes.CDLL(f'D:\PythonProjects\cs2\logitech.driver.dll') # dll路径
+    driver = ctypes.CDLL('D:\PythonProjects\cs2\\func\logitech.driver.dll') # dll路径(需根据下载路径自行配置)
     ok = driver.device_open() == 1  # 该驱动每个进程可打开一个实例
     if not ok:
         print('Error, GHUB or LGS driver not found')
