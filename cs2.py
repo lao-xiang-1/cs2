@@ -5,7 +5,6 @@ from ultralytics import YOLO
 import keyboard
 import func.my_PID as PID
 from time import sleep
-from math import sqrt
 import threading
 import winsound
 
@@ -13,9 +12,9 @@ model=YOLO('best.pt')
 
 pid = PID.PID()
 
-k1 = 1.5
+k1 = 2
 k2 = 3
-k3 = 4.5
+k3 = 4
 
 first = 'head'
 enemy = 'T'
@@ -63,6 +62,15 @@ def near_area_b(p):
     h1 = p[3] * 0.6
     p1 = [p[0], p[1], w1, h1]
     return near_area_h(p1)
+
+def attack(p, new_p):
+    if fire == 'on' and abs(p[0]) <= p[2] * 0.3 and abs(p[1]) <= p[3] * 0.3: # 自动开火
+        pid._click()
+    if new_p:
+        pid.PIDMoveTo(new_p[0], new_p[1], P= 1 / k1)
+        sleep(0.01)
+    elif p:
+        pid.PIDMoveTo(p[0], p[1], P= 1 / k2)
 
 def first_h_b():
     global first
@@ -172,50 +180,23 @@ while running:
             if abs(p[0]) > p[2] * 0.5 and abs(p[1]) > p[3] * 0.5:
                 new_p = near_area_h(p)
                 print(new_p)
-            sum = sqrt(p[0] ** 2 + p[1] ** 2)
-            if fire == 'on' and abs(p[0]) <= p[2] * 0.3 and abs(p[1]) <= p[3] * 0.3: # 自动开火
-                pid._click()
-            if new_p:
-                pid.PIDMoveTo(new_p[0], new_p[1], P= 1 / k2)
-            elif p:
-                pid.PIDMoveTo(p[0], p[1], P= 1 / k3)
-            continue
+            attack(p, new_p)
         elif body:
             new_p = []
             p = near_p(body) # 取离得最近的坐标
-            if abs(p[0]) > p[2] * 0.6 and abs(p[1]) > p[3] * 0.6:
-                new_p = near_area_h(p)
-            sum = sqrt(p[0] ** 2 + p[1] ** 2)
-            if fire == 'on' and abs(p[0]) <= p[2] * 0.3 and abs(p[1]) <= p[3] * 0.3: # 自动开火
-                pid._click()
-            if new_p:
-                pid.PIDMoveTo(new_p[0], new_p[1], P= 1 / k2)
-            elif p:
-                pid.PIDMoveTo(p[0], p[1], P= 1 / k3)
+            if abs(p[0]) > p[2] * 0.5 and abs(p[1]) > p[3] * 0.5:
+                new_p = near_area_b(p)
+            attack(p, new_p)
     elif first == 'body':
         if body:
             new_p = []
             p = near_p(body) # 取离得最近的坐标
-            if abs(p[0]) > p[2] * 0.6 and abs(p[1]) > p[3] * 0.6:
+            if abs(p[0]) > p[2] * 0.5 and abs(p[1]) > p[3] * 0.5:
                 new_p = near_area_h(p)
-            sum = sqrt(p[0] ** 2 + p[1] ** 2)
-            if fire == 'on' and abs(p[0]) <= p[2] * 0.3 and abs(p[1]) <= p[3] * 0.3: # 自动开火
-                pid._click()
-            if new_p:
-                pid.PIDMoveTo(new_p[0], new_p[1], P= 1 / k2)
-            elif p:
-                pid.PIDMoveTo(p[0], p[1], P= 1 / k3)
-            continue
+            attack(p, new_p)
         elif head:
             new_p = []
             p = near_p(head) # 取离得最近的坐标
-            if abs(p[0]) > p[2] * 0.6 and abs(p[1]) > p[3] * 0.6:
-                new_p = near_area_h(p)
-            sum = sqrt(p[0] ** 2 + p[1] ** 2)
-            if fire == 'on' and abs(p[0]) <= p[2] * 0.3 and abs(p[1]) <= p[3] * 0.3: # 自动开火
-                pid._click()
-            if new_p:
-                pid.PIDMoveTo(new_p[0], new_p[1], P= 1 / k2)
-            elif p:
-                pid.PIDMoveTo(p[0], p[1], P= 1 / k3)
-
+            if abs(p[0]) > p[2] * 0.5 and abs(p[1]) > p[3] * 0.5:
+                new_p = near_area_b(p)
+            attack(p, new_p)
