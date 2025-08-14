@@ -1,6 +1,9 @@
 import ctypes
 import os
 import winsound
+import pynput
+from time import sleep
+import pyautogui as pag
 
 try:
     root = os.path.abspath(os.path.dirname(__file__))
@@ -91,7 +94,6 @@ class Logitech:
 
 
 if __name__ == '__main__':  # 测试
-    import pynput
     winsound.Beep(800, 200)
 
     def release(key):
@@ -100,8 +102,13 @@ if __name__ == '__main__':  # 测试
             return False
         elif key == pynput.keyboard.Key.home:  # 移动鼠标 Home 键
             winsound.Beep(600, 200)
-            Logitech.mouse.click(1)
+            x, y = pag.position() 
+            print('before', x, y)
+            sleep(1)
             Logitech.mouse.move(-10, -10)
+            sleep(1)
+            x, y = pag.position() 
+            print('after', x, y)
 
     with pynput.keyboard.Listener(on_release=release) as k:
         k.join()

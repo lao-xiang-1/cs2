@@ -3,18 +3,13 @@ import cv2
 import numpy as np
 from ultralytics import YOLO
 import keyboard
-import func.my_PID as PID
 from time import sleep
 import threading
 import winsound
+from time import time
+import func.logi as logi
 
 model=YOLO('best.pt')
-
-pid = PID.PID()
-
-k1 = 2
-k2 = 3
-k3 = 4
 
 first = 'head'
 enemy = 'T'
@@ -37,40 +32,14 @@ def near_p(s):
         last_xy = xy
     return near_p
 
-def near_area_h(p):
-    new_p = []
-    k = p[3] / p[2] # h / w
-    if abs(p[1] / p[0]) >= k:
-        if p[1] >= 0:
-            err_y = p[1] - p[3] / 2 # err_y - h / 2
-            err_x = err_y * p[0] / p[1]
-        elif p[1] < 0:
-            err_y = p[1] + p[3] / 2 # err_y + h / 2
-            err_x = err_y * p[0] / p[1]
-    elif abs(p[1] / p[0]) < k:
-        if p[0] >= 0:
-            err_x = p[0] - p[2] / 2 # err_x - w / 2
-            err_y = err_x * p[1] / p[0]
-        elif p[0] < 0:
-            err_x = p[0] + p[2] / 2 # err_x + w / 2
-            err_y = err_x * p[1] / p[0]
-    new_p = [int(err_x), int(err_y)]
-    return new_p
-
-def near_area_b(p):
-    w1 = p[2]
-    h1 = p[3] * 0.6
-    p1 = [p[0], p[1], w1, h1]
-    return near_area_h(p1)
-
-def attack(p, new_p):
+def attack(p):
     if fire == 'on' and abs(p[0]) <= p[2] * 0.3 and abs(p[1]) <= p[3] * 0.3: # 自动开火
-        pid._click()
-    if new_p:
-        pid.PIDMoveTo(new_p[0], new_p[1], P= 1 / k1)
-        sleep(0.01)
-    elif p:
-        pid.PIDMoveTo(p[0], p[1], P= 1 / k2)
+        logi.Logitech.mouse.press(1)
+        sleep(0.1)
+        logi.Logitech.mouse.release(1)
+    else:
+        logi.Logitech.mouse.move(p[0], p[1])
+        sleep(0.07)
 
 def first_h_b():
     global first
@@ -118,9 +87,10 @@ def select():
 threading.Thread(target=select, daemon=True).start()
 
 while running:
-    print('优先打: ', first)
-    print('敌人: ', enemy)
-    print('自动开火: ', fire)
+    start_time = time()
+    # print('优先打: ', first)
+    # print('敌人: ', enemy)
+    # print('自动开火: ', fire)
     # sleep(1)
     #2560*1600
     while pause:
@@ -130,7 +100,7 @@ while running:
     frame = np.array(screenshot)
     frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
-    results=model.predict(frame, save=False, conf=0.5)
+    results=model.predict(frame, save=False, conf=0.5, verbose=False)
 
     head = []
     body = []
@@ -161,6 +131,7 @@ while running:
 
             if enemy == 'T':
                 if cls ==  3:  # 头部类别
+                    cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
                     head.append([err_x, err_y, w, h])
                 if cls ==  2:  # 身体类别
                     body.append([err_x, err_y, w, h])
@@ -170,33 +141,25 @@ while running:
                 if cls ==  0:  # 身体类别
                     body.append([err_x, err_y, w, h])
 
-    print(head)
-    print(body)
+    # cv2.imshow('frame', frame)
+    # if cv2.waitKey(1) & 0xFF == ord('q'):
+    #     break
 
     if first == 'head':
         if head:
-            new_p = []
             p = near_p(head) # 取离得最近的坐标
-            if abs(p[0]) > p[2] * 0.5 and abs(p[1]) > p[3] * 0.5:
-                new_p = near_area_h(p)
-                print(new_p)
-            attack(p, new_p)
+            attack(p)
         elif body:
-            new_p = []
             p = near_p(body) # 取离得最近的坐标
-            if abs(p[0]) > p[2] * 0.5 and abs(p[1]) > p[3] * 0.5:
-                new_p = near_area_b(p)
-            attack(p, new_p)
+            attack(p)
     elif first == 'body':
         if body:
-            new_p = []
             p = near_p(body) # 取离得最近的坐标
-            if abs(p[0]) > p[2] * 0.5 and abs(p[1]) > p[3] * 0.5:
-                new_p = near_area_h(p)
-            attack(p, new_p)
+            attack(p)
         elif head:
-            new_p = []
             p = near_p(head) # 取离得最近的坐标
-            if abs(p[0]) > p[2] * 0.5 and abs(p[1]) > p[3] * 0.5:
-                new_p = near_area_b(p)
-            attack(p, new_p)
+            attack(p)
+    end_time = time()
+    print(f"Frame processed in {(end_time - start_time) * 1000} ms")
+
+cv2.destroyAllWindows()
