@@ -1,1 +1,10 @@
 **/__pycache__/
+build/
+cs_build/
+build1/
+CMakeLists_original.txt
+images/
+.vscode/
+*.bmp
+*.exe
+*.wts
