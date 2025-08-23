@@ -49,15 +49,11 @@ target_link_libraries(myplugins nvinfer cudart)
 
 file(GLOB_RECURSE SRCS ${PROJECT_SOURCE_DIR}/src/*.cpp ${PROJECT_SOURCE_DIR}/src/*.cu)
 
- add_executable(cs2_det ${PROJECT_SOURCE_DIR}/cs2_det.cpp ${SRCS})
- target_link_libraries(cs2_det nvinfer cudart myplugins ${OpenCV_LIBS})
+add_executable(cs2_det ${PROJECT_SOURCE_DIR}/cs2_det.cpp ${SRCS})
+target_link_libraries(cs2_det nvinfer cudart myplugins ${OpenCV_LIBS})
 
 add_executable(yolov8_det ${PROJECT_SOURCE_DIR}/yolov8_det.cpp ${SRCS})
-
-target_link_libraries(yolov8_det nvinfer)
-target_link_libraries(yolov8_det cudart)
-target_link_libraries(yolov8_det myplugins)
-target_link_libraries(yolov8_det ${OpenCV_LIBS})
+target_link_libraries(yolov8_det nvinfer cudart myplugins ${OpenCV_LIBS})
 
 # add_executable(yolov8_5u_det ${PROJECT_SOURCE_DIR}/yolov8_5u_det.cpp ${SRCS})
 # target_link_libraries(yolov8_5u_det nvinfer cudart myplugins ${OpenCV_LIBS})

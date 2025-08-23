@@ -11,6 +11,14 @@
 #include "screenshot.h"
 #include "mouse.h"
 #include "pid.h"
+#include "json.hpp"
+
+struct Config{
+    int Head_body = 0;
+    int CT_T = 1;
+    int Auto_fire = 0;
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Config, Head_body, CT_T, Auto_fire);
+};
 
 Logger gLogger;
 using namespace nvinfer1;
@@ -115,37 +123,37 @@ bool parse_args(int argc, char** argv, std::string& engine, std::string& cuda_po
     return true;
 }
 
-bool read_enemy_config(std::string file_name) {
-    std::ifstream file(file_name, std::ios::in);
-    if (!file.good()) {
-        std::cerr << "read " << file_name << " error!" << std::endl;
-        file.close();
+bool read_enemy_config(std::string cfg_pth) {
+    std::ifstream config_is(cfg_pth, std::ios::in);
+    if (!config_is.good()) {
+        std::cerr << "the config path is wrong!" << std::endl;
+        config_is.close();
         return false;
     }
-    Head_body = file.get() - '0'; // Read the first character and convert to integer
-    if (Head_body != 0 && Head_body != 1) {
-        std::cerr << "Invalid value for Head_body: " << Head_body << ". Expected 0 or 1." << std::endl;
-        file.close();
-        return false;
+
+    nlohmann::json cfg_json;
+    config_is >> cfg_json;
+    config_is.close();
+    Config cfg;
+    try
+    {
+        cfg = cfg_json.get<Config>();
     }
-    CT_T = file.get() - '0'; // Read the second character and convert to integer
-    if (CT_T != 0 && CT_T != 1) {
-        std::cerr << "Invalid value for CT_T: " << CT_T << ". Expected 0 or 1." << std::endl;
-        file.close();
+    catch (const nlohmann::detail::exception &e)
+    {
+        std::cerr << "Json Params Parse failed :" << e.what() << '\n';
         return false;
+        exit(-1);
     }
-    Auto_fire = file.get() - '0'; // Read the third character and convert to integer
-    if (Auto_fire != 0 && Auto_fire != 1) {
-        std::cerr << "Invalid value for Auto_fire: " << Auto_fire << ". Expected 0 or 1." << std::endl;
-        file.close();
-        return false;
-    }
-    file.close();
+
+    Head_body = cfg.Head_body;
+    CT_T = cfg.CT_T;
+    Auto_fire = cfg.Auto_fire; 
     return true;
 }
 
 int main(int argc, char** argv) {
-    if (!read_enemy_config("config\\enemy_config.txt")){
+    if (!read_enemy_config("config\\enemy_config.json")){
         std::cerr << "Failed to read enemy configuration." << std::endl;
         return -1;
     }
